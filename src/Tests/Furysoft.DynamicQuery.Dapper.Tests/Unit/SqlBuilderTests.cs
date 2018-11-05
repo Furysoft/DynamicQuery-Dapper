@@ -7,14 +7,8 @@
 namespace Furysoft.DynamicQuery.Dapper.Tests.Unit
 {
     using System;
-    using System.Collections.Generic;
-    using System.ComponentModel.DataAnnotations;
     using System.Diagnostics;
     using Attributes;
-    using DynamicQuery.Entities.Operations;
-    using DynamicQuery.Entities.QueryComponents;
-    using DynamicQuery.Logic;
-    using Logic;
     using NUnit.Framework;
 
     /// <summary>
@@ -47,18 +41,43 @@ namespace Furysoft.DynamicQuery.Dapper.Tests.Unit
             Console.WriteLine(sqlEntity.Sql);
         }
 
+        /// <summary>
+        /// Builds the when query in with count cte expect SQL built.
+        /// </summary>
+        [Test]
+        public void Build_WhenQueryInWithCountCte_ExpectSqlBuilt()
+        {
+            // Arrange
+            var dynamicQueryParser = new DynamicQueryParser();
+            var query1 = dynamicQueryParser.Parse<TestEntity>("where::column_id:1 and Name:bob and Age:[18,32}orderby::column_id asc page::1,10");
+
+            // Act
+            var stopwatch = Stopwatch.StartNew();
+            var sqlEntity = query1.CreateSqlQuery()
+                .WithCountCte()
+                .Select("ColumnId, Name, Age")
+                .From("users")
+                .Build();
+            stopwatch.Stop();
+
+            // Assert
+            this.WriteTimeElapsed(stopwatch);
+
+            Console.WriteLine(sqlEntity.Sql);
+        }
+
         /// <summary>The Test Entity</summary>
         private sealed class TestEntity
         {
+            /// <summary>Gets or sets the age.</summary>
+            public int Age { get; set; }
+
             /// <summary>Gets or sets the column identifier.</summary>
             [Name("column_id")]
             public string ColumnId { get; set; }
 
             /// <summary>Gets or sets the name.</summary>
             public string Name { get; set; }
-
-            /// <summary>Gets or sets the age.</summary>
-            public int Age { get; set; }
         }
     }
 }

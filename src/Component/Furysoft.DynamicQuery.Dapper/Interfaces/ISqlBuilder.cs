@@ -33,5 +33,11 @@ namespace Furysoft.DynamicQuery.Dapper.Interfaces
         /// </summary>
         /// <returns>The <see cref="SqlEntity"/></returns>
         SqlEntity Build();
+
+        /// <summary>
+        /// Generates SQL using a CTE to acquire the total_rows column, for paged queries
+        /// </summary>
+        /// <returns>The <see cref="ISqlBuilder"/></returns>
+        ISqlBuilder WithCountCte();
     }
 }

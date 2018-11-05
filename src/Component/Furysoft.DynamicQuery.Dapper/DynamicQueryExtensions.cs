@@ -18,7 +18,7 @@ namespace Furysoft.DynamicQuery.Dapper
         /// <summary>
         /// The formatter
         /// </summary>
-        private static readonly IFormatter Formatter = FormatterFactory.Create();
+        private static readonly IFormatterFactory Formatter = FormatterInitializer.Create();
 
         /// <summary>
         /// Builds the specified query.

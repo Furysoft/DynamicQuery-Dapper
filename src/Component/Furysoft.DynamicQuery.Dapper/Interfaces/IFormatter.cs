@@ -20,7 +20,9 @@ namespace Furysoft.DynamicQuery.Dapper.Interfaces
         /// <param name="query">The query.</param>
         /// <param name="select">The select.</param>
         /// <param name="from">From.</param>
-        /// <returns>The <see cref="SqlEntity"/></returns>
+        /// <returns>
+        /// The <see cref="SqlEntity" />
+        /// </returns>
         SqlEntity Format(IQuery query, string select, string from);
     }
 }

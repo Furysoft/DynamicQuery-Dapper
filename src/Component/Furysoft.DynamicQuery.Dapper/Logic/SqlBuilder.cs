@@ -17,10 +17,10 @@ namespace Furysoft.DynamicQuery.Dapper.Logic
     public sealed class SqlBuilder : ISqlBuilder
     {
         /// <summary>
-        /// The formatter
+        /// The formatter factory
         /// </summary>
         [NotNull]
-        private readonly IFormatter formatter;
+        private readonly IFormatterFactory formatterFactory;
 
         /// <summary>
         /// The query
@@ -31,15 +31,20 @@ namespace Furysoft.DynamicQuery.Dapper.Logic
         /// <summary>
         /// Initializes a new instance of the <see cref="SqlBuilder" /> class.
         /// </summary>
+        /// <param name="formatterFactory">The formatter factory.</param>
         /// <param name="query">The query.</param>
-        /// <param name="formatter">The formatter.</param>
         public SqlBuilder(
-            [NotNull] IFormatter formatter,
+            [NotNull] IFormatterFactory formatterFactory,
             [NotNull] IQuery query)
         {
             this.query = query;
-            this.formatter = formatter;
+            this.formatterFactory = formatterFactory;
         }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether [count cte].
+        /// </summary>
+        private bool CountCte { get; set; } = false;
 
         /// <summary>
         /// Gets or sets from query.
@@ -57,7 +62,10 @@ namespace Furysoft.DynamicQuery.Dapper.Logic
         /// <returns>The <see cref="SqlEntity"/></returns>
         public SqlEntity Build()
         {
-            return this.formatter.Format(this.query, this.SelectQuery, this.FromQuery);
+            var type = this.CountCte ? FormatterType.CountCte : FormatterType.Standard;
+            var formatter = this.formatterFactory.Create(type);
+
+            return formatter.Format(this.query, this.SelectQuery, this.FromQuery);
         }
 
         /// <summary>
@@ -79,6 +87,16 @@ namespace Furysoft.DynamicQuery.Dapper.Logic
         public ISqlBuilder Select(string select)
         {
             this.SelectQuery = select;
+            return this;
+        }
+
+        /// <summary>
+        /// Withes the count cte.
+        /// </summary>
+        /// <returns>The <see cref="ISqlBuilder"/></returns>
+        public ISqlBuilder WithCountCte()
+        {
+            this.CountCte = true;
             return this;
         }
     }

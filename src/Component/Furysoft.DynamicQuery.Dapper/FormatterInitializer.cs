@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="FormatterFactory.cs" company="Email Hippo Ltd">
-//   © Email Hippo Ltd
+// <copyright file="FormatterInitializer.cs" company="Simon Paramore">
+// © 2017, Simon Paramore
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -13,13 +13,13 @@ namespace Furysoft.DynamicQuery.Dapper
     /// <summary>
     /// The Formatter Factory
     /// </summary>
-    public static class FormatterFactory
+    public static class FormatterInitializer
     {
         /// <summary>
         /// Creates this instance.
         /// </summary>
         /// <returns>The <see cref="IFormatter"/></returns>
-        public static IFormatter Create()
+        public static IFormatterFactory Create()
         {
             var orderByFormatter = new OrderByFormatter();
             var pageFormatter = new PostgresPageFormatter();
@@ -35,7 +35,10 @@ namespace Furysoft.DynamicQuery.Dapper
                 greaterThanFormatter,
                 rangeFormatter);
 
-            return new Formatter(orderByFormatter, pageFormatter, whereFormatter);
+            var standardFormatter = new Formatter(orderByFormatter, pageFormatter, whereFormatter);
+            var countCteFormatter = new CountCteFormatter(orderByFormatter, pageFormatter, whereFormatter);
+
+            return new FormatterFactory(standardFormatter, countCteFormatter);
         }
     }
 }
