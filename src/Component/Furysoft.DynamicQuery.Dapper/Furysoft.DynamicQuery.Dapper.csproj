@@ -13,7 +13,7 @@
     <Authors>Simon Paramore</Authors>
     <Company>Furysoft</Company>
     <Description>Dynamic Query Generator for use with Dapper</Description>
-    <Version>1.0.0</Version>
+    <Version>1.0.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
