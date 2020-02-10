@@ -7,12 +7,12 @@
 namespace Furysoft.DynamicQuery.Dapper.Logic.Formatters
 {
     using System.Collections.Generic;
-    using DynamicQuery.Entities.Operations;
-    using Entities;
-    using Interfaces.Formatters;
+    using Furysoft.DynamicQuery.Dapper.Entities;
+    using Furysoft.DynamicQuery.Dapper.Interfaces.Formatters;
+    using Furysoft.DynamicQuery.Entities.Operations;
 
     /// <summary>
-    /// The Less Than Formatter
+    /// The Less Than Formatter.
     /// </summary>
     /// <seealso cref="IWhereOperatorFormatter{LessThanOperator}" />
     public sealed class LessThanFormatter : IWhereOperatorFormatter<LessThanOperator>
@@ -21,28 +21,22 @@ namespace Furysoft.DynamicQuery.Dapper.Logic.Formatters
         /// Formats the specified node.
         /// </summary>
         /// <param name="node">The node.</param>
-        /// <param name="dataDictionary">The data dictionary.</param>
-        /// <returns>The <see cref="SqlDataResponse"/></returns>
-        public SqlDataResponse Format(LessThanOperator node, IDictionary<string, object> dataDictionary)
+        /// <param name="paramSuffix">The parameter suffix.</param>
+        /// <returns>The <see cref="SqlDataResponse" />.</returns>
+        public SqlDataResponse Format(LessThanOperator node, int paramSuffix)
         {
-            if (node == null)
-            {
-                return null;
-            }
-
-            dataDictionary.Add(node.Name, node.Value);
+            var varName = $"{node.Name}{paramSuffix}";
 
             var sql = node.Inclusive
-                ? $"{node.Name} <= @{node.Name}"
-                : $"{node.Name} < @{node.Name}";
+                ? $"{node.Name} <= @{varName}"
+                : $"{node.Name} < @{varName}";
 
-            var rtn = new SqlDataResponse
+            return new SqlDataResponse
             {
-                Params = dataDictionary,
-                Sql = sql
+                Params = new List<SqlWhereParam> { new SqlWhereParam { Value = node.Value, VarName = varName } },
+                Sql = sql,
+                LastSuffix = paramSuffix,
             };
-
-            return rtn;
         }
     }
 }

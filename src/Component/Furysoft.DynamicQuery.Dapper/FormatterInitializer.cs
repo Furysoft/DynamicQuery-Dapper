@@ -6,19 +6,19 @@
 
 namespace Furysoft.DynamicQuery.Dapper
 {
-    using Interfaces;
-    using Logic;
-    using Logic.Formatters;
+    using Furysoft.DynamicQuery.Dapper.Interfaces;
+    using Furysoft.DynamicQuery.Dapper.Logic;
+    using Furysoft.DynamicQuery.Dapper.Logic.Formatters;
 
     /// <summary>
-    /// The Formatter Factory
+    /// The Formatter Factory.
     /// </summary>
     public static class FormatterInitializer
     {
         /// <summary>
         /// Creates this instance.
         /// </summary>
-        /// <returns>The <see cref="IFormatter"/></returns>
+        /// <returns>The <see cref="IFormatter"/>.</returns>
         public static IFormatterFactory Create()
         {
             var orderByFormatter = new OrderByFormatter();

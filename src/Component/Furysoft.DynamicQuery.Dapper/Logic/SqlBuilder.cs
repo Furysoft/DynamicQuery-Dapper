@@ -6,24 +6,24 @@
 
 namespace Furysoft.DynamicQuery.Dapper.Logic
 {
-    using DynamicQuery.Interfaces;
-    using Entities;
-    using Interfaces;
+    using Furysoft.DynamicQuery.Dapper.Entities;
+    using Furysoft.DynamicQuery.Dapper.Interfaces;
+    using Furysoft.DynamicQuery.Interfaces;
     using JetBrains.Annotations;
 
     /// <summary>
-    /// The SQL Builder
+    /// The SQL Builder.
     /// </summary>
     public sealed class SqlBuilder : ISqlBuilder
     {
         /// <summary>
-        /// The formatter factory
+        /// The formatter factory.
         /// </summary>
         [NotNull]
         private readonly IFormatterFactory formatterFactory;
 
         /// <summary>
-        /// The query
+        /// The query.
         /// </summary>
         [NotNull]
         private readonly IQuery query;
@@ -42,61 +42,30 @@ namespace Furysoft.DynamicQuery.Dapper.Logic
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether [count cte].
-        /// </summary>
-        private bool CountCte { get; set; } = false;
-
-        /// <summary>
         /// Gets or sets from query.
         /// </summary>
         private string FromQuery { get; set; }
 
         /// <summary>
-        /// Gets or sets the select query.
-        /// </summary>
-        private string SelectQuery { get; set; }
-
-        /// <summary>
         /// Builds this instance.
         /// </summary>
-        /// <returns>The <see cref="SqlEntity"/></returns>
+        /// <returns>The <see cref="SqlEntity"/>.</returns>
         public SqlEntity Build()
         {
-            var type = this.CountCte ? FormatterType.CountCte : FormatterType.Standard;
-            var formatter = this.formatterFactory.Create(type);
+            var formatterType = this.query.PageNode == null ? FormatterType.Standard : FormatterType.CountCte;
+            var formatter = this.formatterFactory.Create(formatterType);
 
-            return formatter.Format(this.query, this.SelectQuery, this.FromQuery);
+            return formatter.Format(this.query, this.FromQuery);
         }
 
         /// <summary>
         /// From the specified from.
         /// </summary>
         /// <param name="from">From.</param>
-        /// <returns>The <see cref="ISqlBuilder" /></returns>
+        /// <returns>The <see cref="ISqlBuilder" />.</returns>
         public ISqlBuilder From(string from)
         {
             this.FromQuery = from;
-            return this;
-        }
-
-        /// <summary>
-        /// Selects the specified select.
-        /// </summary>
-        /// <param name="select">The select.</param>
-        /// <returns>The <see cref="ISqlBuilder"/></returns>
-        public ISqlBuilder Select(string select)
-        {
-            this.SelectQuery = select;
-            return this;
-        }
-
-        /// <summary>
-        /// Withes the count cte.
-        /// </summary>
-        /// <returns>The <see cref="ISqlBuilder"/></returns>
-        public ISqlBuilder WithCountCte()
-        {
-            this.CountCte = true;
             return this;
         }
     }

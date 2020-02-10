@@ -7,7 +7,7 @@
 namespace Furysoft.DynamicQuery.Dapper.Interfaces
 {
     /// <summary>
-    /// The Formatter Type
+    /// The Formatter Type.
     /// </summary>
     public enum FormatterType
     {
@@ -19,6 +19,6 @@ namespace Furysoft.DynamicQuery.Dapper.Interfaces
         /// <summary>
         /// The count cte
         /// </summary>
-        CountCte
+        CountCte,
     }
 }

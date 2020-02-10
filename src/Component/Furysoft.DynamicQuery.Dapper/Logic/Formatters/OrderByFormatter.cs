@@ -10,12 +10,12 @@ namespace Furysoft.DynamicQuery.Dapper.Logic.Formatters
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
-    using DynamicQuery.Entities;
-    using DynamicQuery.Entities.QueryComponents;
-    using Interfaces.Formatters;
+    using Furysoft.DynamicQuery.Dapper.Interfaces.Formatters;
+    using Furysoft.DynamicQuery.Entities;
+    using Furysoft.DynamicQuery.Entities.QueryComponents;
 
     /// <summary>
-    /// The Order By Formatter
+    /// The Order By Formatter.
     /// </summary>
     public sealed class OrderByFormatter : IOrderByFormatter
     {
@@ -23,7 +23,7 @@ namespace Furysoft.DynamicQuery.Dapper.Logic.Formatters
         /// Formats the specified node.
         /// </summary>
         /// <param name="node">The node.</param>
-        /// <returns>The formatted sql string</returns>
+        /// <returns>The formatted sql string.</returns>
         public string Format(List<OrderByNode> node)
         {
             if (node == null || !node.Any())
@@ -50,7 +50,7 @@ namespace Furysoft.DynamicQuery.Dapper.Logic.Formatters
         /// Gets the sort order.
         /// </summary>
         /// <param name="order">The order.</param>
-        /// <returns>The Sort Order</returns>
+        /// <returns>The Sort Order.</returns>
         private static string GetSortOrder(SortOrder order)
         {
             switch (order)

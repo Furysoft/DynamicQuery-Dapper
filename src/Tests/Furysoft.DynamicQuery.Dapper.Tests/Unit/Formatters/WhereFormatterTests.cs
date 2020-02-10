@@ -6,17 +6,20 @@
 
 namespace Furysoft.DynamicQuery.Dapper.Tests.Unit.Formatters
 {
+    using System;
     using System.Collections.Generic;
     using System.Diagnostics;
-    using DynamicQuery.Entities.Operations;
-    using Entities;
-    using Interfaces.Formatters;
-    using Logic.Formatters;
+    using System.Linq;
+    using Furysoft.DynamicQuery.Dapper.Entities;
+    using Furysoft.DynamicQuery.Dapper.Interfaces.Formatters;
+    using Furysoft.DynamicQuery.Dapper.Logic.Formatters;
+    using Furysoft.DynamicQuery.Entities.Operations;
+    using Furysoft.DynamicQuery.Entities.QueryComponents;
     using Moq;
     using NUnit.Framework;
 
     /// <summary>
-    /// The Where Formatter Tests
+    /// The Where Formatter Tests.
     /// </summary>
     [TestFixture]
     public sealed class WhereFormatterTests : TestBase
@@ -34,10 +37,12 @@ namespace Furysoft.DynamicQuery.Dapper.Tests.Unit.Formatters
             var mockRangeFormatter = new Mock<IWhereOperatorFormatter<RangeOperator>>();
 
             mockEqualsFormatter
-                .Setup(r => r.Format(It.IsAny<EqualsOperator>(), It.IsAny<IDictionary<string, object>>()))
+                .Setup(r => r.Format(It.IsAny<EqualsOperator>(), It.IsAny<int>()))
                 .Returns(new SqlDataResponse
                 {
-                    Sql = "ColumnName = @ColumnName",
+                    Sql = "ColumnName = @ColumnName1",
+                    LastSuffix = 1,
+                    Params = new List<SqlWhereParam> { new SqlWhereParam { Value = "bob", VarName = "ColumnName1" } },
                 });
 
             var whereFormatter = new WhereFormatter(
@@ -46,19 +51,22 @@ namespace Furysoft.DynamicQuery.Dapper.Tests.Unit.Formatters
                 mockGreaterThanFormatter.Object,
                 mockRangeFormatter.Object);
 
-            var whereNode = new EqualsOperator
+            var op = new EqualsOperator
             {
                 Name = "ColumnName",
                 IsNot = false,
                 Statement = "ColumnName:bob",
-                Value = "bob"
+                Value = "bob",
             };
 
-            var dataDictionary = new Dictionary<string, object>();
+            var whereNode = new WhereNode
+            {
+                Statement = new WhereStatement { Value = op },
+            };
 
             // Act
             var stopwatch = Stopwatch.StartNew();
-            var sqlDataResponse = whereFormatter.Format(whereNode, dataDictionary);
+            var sqlDataResponse = whereFormatter.Format(whereNode);
             stopwatch.Stop();
 
             // Assert
@@ -66,8 +74,8 @@ namespace Furysoft.DynamicQuery.Dapper.Tests.Unit.Formatters
 
             Assert.That(sqlDataResponse, Is.Not.Null);
 
-        // Assert.That(sqlDataResponse.Sql, Is.EqualTo("WHERE ColumnName = @ColumnName"));
-        // Assert.That(sqlDataResponse.Params["ColumnName"], Is.EqualTo("bob"));
+            Assert.That(sqlDataResponse.Sql, Is.EqualTo($"WHERE ColumnName = @ColumnName1{Environment.NewLine}"));
+            Assert.That(sqlDataResponse.Params.First(r => r.VarName == "ColumnName1").Value, Is.EqualTo("bob"));
         }
     }
 }

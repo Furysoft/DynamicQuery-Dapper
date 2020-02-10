@@ -7,22 +7,22 @@
 namespace Furysoft.DynamicQuery.Dapper.Logic
 {
     using System;
-    using Interfaces;
+    using Furysoft.DynamicQuery.Dapper.Interfaces;
     using JetBrains.Annotations;
 
     /// <summary>
-    /// The Formatter Factory
+    /// The Formatter Factory.
     /// </summary>
     public sealed class FormatterFactory : IFormatterFactory
     {
         /// <summary>
-        /// The count cte formatter
+        /// The count cte formatter.
         /// </summary>
         [NotNull]
         private readonly IFormatter countCteFormatter;
 
         /// <summary>
-        /// The standard formatter
+        /// The standard formatter.
         /// </summary>
         [NotNull]
         private readonly IFormatter standardFormatter;
@@ -42,7 +42,7 @@ namespace Furysoft.DynamicQuery.Dapper.Logic
         /// Creates the specified type.
         /// </summary>
         /// <param name="type">The type.</param>
-        /// <returns>The <see cref="IFormatter"/></returns>
+        /// <returns>The <see cref="IFormatter"/>.</returns>
         public IFormatter Create(FormatterType type)
         {
             switch (type)

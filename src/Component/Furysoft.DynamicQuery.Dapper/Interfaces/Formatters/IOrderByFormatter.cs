@@ -7,10 +7,10 @@
 namespace Furysoft.DynamicQuery.Dapper.Interfaces.Formatters
 {
     using System.Collections.Generic;
-    using DynamicQuery.Entities.QueryComponents;
+    using Furysoft.DynamicQuery.Entities.QueryComponents;
 
     /// <summary>
-    /// The Order By Formatter Interface
+    /// The Order By Formatter Interface.
     /// </summary>
     public interface IOrderByFormatter
     {
@@ -18,7 +18,7 @@ namespace Furysoft.DynamicQuery.Dapper.Interfaces.Formatters
         /// Formats the specified node.
         /// </summary>
         /// <param name="node">The node.</param>
-        /// <returns>The order by string</returns>
+        /// <returns>The order by string.</returns>
         string Format(List<OrderByNode> node);
     }
 }

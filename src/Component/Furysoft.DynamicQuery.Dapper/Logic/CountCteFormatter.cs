@@ -9,32 +9,33 @@ namespace Furysoft.DynamicQuery.Dapper.Logic
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
-    using DynamicQuery.Interfaces;
-    using Entities;
+    using Furysoft.DynamicQuery.Dapper.Entities;
+    using Furysoft.DynamicQuery.Dapper.Exceptions;
+    using Furysoft.DynamicQuery.Dapper.Interfaces;
+    using Furysoft.DynamicQuery.Dapper.Interfaces.Formatters;
+    using Furysoft.DynamicQuery.Interfaces;
     using global::Dapper;
-    using Interfaces;
-    using Interfaces.Formatters;
     using JetBrains.Annotations;
 
     /// <summary>
-    /// The Count CTR Formatter
+    /// The Count CTR Formatter.
     /// </summary>
     public sealed class CountCteFormatter : IFormatter
     {
         /// <summary>
-        /// The order by formatter
+        /// The order by formatter.
         /// </summary>
         [NotNull]
         private readonly IOrderByFormatter orderByFormatter;
 
         /// <summary>
-        /// The page formatter
+        /// The page formatter.
         /// </summary>
         [NotNull]
         private readonly IPageFormatter pageFormatter;
 
         /// <summary>
-        /// The where formatter
+        /// The where formatter.
         /// </summary>
         [NotNull]
         private readonly IWhereFormatter whereFormatter;
@@ -59,41 +60,50 @@ namespace Furysoft.DynamicQuery.Dapper.Logic
         /// Formats the specified query.
         /// </summary>
         /// <param name="query">The query.</param>
-        /// <param name="select">The select.</param>
-        /// <param name="from">From.</param>
-        /// <returns>
-        /// The <see cref="SqlEntity" />
-        /// </returns>
-        public SqlEntity Format(IQuery query, string select, string from)
+        /// <param name="fromQuery">From query.</param>
+        /// <returns>The <see cref="SqlEntity" />.</returns>
+        public SqlEntity Format(IQuery query, string fromQuery)
         {
-            var dataDictionary = new Dictionary<string, object>();
-
             var sb = new StringBuilder();
 
+            /* The data_cte section */
             sb.Append("WITH data_cte AS (\r\n");
 
-            if (!string.IsNullOrWhiteSpace(select))
+            if (query.SelectNode != null)
             {
+                var select = string.Join(", ", query.SelectNode.SelectColumns);
+                sb.AppendFormat(" SELECT {0}\r\n", select);
+            }
+            else
+            {
+                // If no select statement is provided, select everything.
+                var newSelectQuery = query.SelectAll();
+                var select = string.Join(", ", newSelectQuery.SelectNode.SelectColumns);
                 sb.AppendFormat(" SELECT {0}\r\n", select);
             }
 
-            if (!string.IsNullOrWhiteSpace(from))
+            if (!string.IsNullOrWhiteSpace(fromQuery))
             {
-                sb.AppendFormat(" FROM {0}\r\n", from);
+                sb.AppendFormat(" FROM {0}\r\n", fromQuery);
+            }
+            else
+            {
+                throw new SqlParseException("No 'from' statement was provided for SQL type query.");
             }
 
+            var whereParams = new List<SqlWhereParam>();
             if (query.WhereNode != null)
             {
-                var where = this.whereFormatter.Format(query.WhereNode, dataDictionary);
+                var where = this.whereFormatter.Format(query.WhereNode);
                 sb.AppendFormat(" {0}\r\n", where.Sql);
+                whereParams = where.Params;
             }
 
+            /* The count section */
             sb.Append("), count_cte AS (SELECT COUNT(*) as total_rows FROM data_cte)\r\n");
 
-            if (!string.IsNullOrWhiteSpace(select))
-            {
-                sb.AppendFormat(" SELECT {0}, total_rows\r\n", select);
-            }
+            /* The Cross Join section */
+            sb.AppendFormat(" SELECT {0}, total_rows\r\n", query.SelectNode.SelectColumns);
 
             sb.AppendFormat("FROM data_cte CROSS JOIN count_cte\r\n");
 
@@ -105,16 +115,17 @@ namespace Furysoft.DynamicQuery.Dapper.Logic
 
             if (query.PageNode != null)
             {
-                var page = this.pageFormatter.Format(query.PageNode, dataDictionary);
+                var page = this.pageFormatter.Format(query.PageNode);
                 sb.AppendFormat("{0}\r\n", page.Sql);
+                whereParams = whereParams.Concat(page.Params).ToList();
             }
 
             var sql = sb.ToString();
 
             var data = new DynamicParameters();
-            foreach (var keyValue in dataDictionary)
+            foreach (var whereParam in whereParams)
             {
-                data.Add(keyValue.Key, keyValue.Value);
+                data.Add(whereParam.VarName, whereParam.Value);
             }
 
             return new SqlEntity(sql, data);

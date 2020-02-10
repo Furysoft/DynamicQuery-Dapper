@@ -6,14 +6,14 @@
 
 namespace Furysoft.DynamicQuery.Dapper.Tests.Unit.Formatters
 {
-    using System.Collections.Generic;
     using System.Diagnostics;
-    using DynamicQuery.Entities.Operations;
-    using Logic.Formatters;
+    using System.Linq;
+    using Furysoft.DynamicQuery.Dapper.Logic.Formatters;
+    using Furysoft.DynamicQuery.Entities.Operations;
     using NUnit.Framework;
 
     /// <summary>
-    /// The Greater Than Formatter Tests
+    /// The Greater Than Formatter Tests.
     /// </summary>
     [TestFixture]
     public sealed class GreaterThanFormatterTests : TestBase
@@ -32,21 +32,19 @@ namespace Furysoft.DynamicQuery.Dapper.Tests.Unit.Formatters
                 Name = "ColumnName",
                 Value = 23,
                 Inclusive = true,
-                Statement = "ColumnName:[*,23]"
+                Statement = "ColumnName:[*,23]",
             };
-
-            var dataDictionary = new Dictionary<string, object>();
 
             // Act
             var stopwatch = Stopwatch.StartNew();
-            var sqlDataResponse = greaterThanFormatter.Format(node, dataDictionary);
+            var sqlDataResponse = greaterThanFormatter.Format(node, 0);
             stopwatch.Stop();
 
             // Assert
             this.WriteTimeElapsed(stopwatch);
 
-            Assert.That(sqlDataResponse.Sql, Is.EqualTo("ColumnName >= @ColumnName"));
-            Assert.That(sqlDataResponse.Params["ColumnName"], Is.EqualTo(23));
+            Assert.That(sqlDataResponse.Sql, Is.EqualTo("ColumnName >= @ColumnName0"));
+            Assert.That(sqlDataResponse.Params.First().Value, Is.EqualTo(23));
         }
 
         /// <summary>
@@ -63,21 +61,19 @@ namespace Furysoft.DynamicQuery.Dapper.Tests.Unit.Formatters
                 Name = "ColumnName",
                 Value = 23,
                 Inclusive = false,
-                Statement = "ColumnName:[*,23]"
+                Statement = "ColumnName:[*,23]",
             };
-
-            var dataDictionary = new Dictionary<string, object>();
 
             // Act
             var stopwatch = Stopwatch.StartNew();
-            var sqlDataResponse = greaterThanFormatter.Format(node, dataDictionary);
+            var sqlDataResponse = greaterThanFormatter.Format(node, 0);
             stopwatch.Stop();
 
             // Assert
             this.WriteTimeElapsed(stopwatch);
 
-            Assert.That(sqlDataResponse.Sql, Is.EqualTo("ColumnName > @ColumnName"));
-            Assert.That(sqlDataResponse.Params["ColumnName"], Is.EqualTo(23));
+            Assert.That(sqlDataResponse.Sql, Is.EqualTo("ColumnName > @ColumnName0"));
+            Assert.That(sqlDataResponse.Params.First().Value, Is.EqualTo(23));
         }
     }
 }

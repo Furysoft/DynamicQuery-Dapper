@@ -9,18 +9,17 @@ namespace Furysoft.DynamicQuery.Dapper.Tests.Integration.Formatters
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
-    using DynamicQuery.Entities.Nodes;
-    using DynamicQuery.Entities.Operations;
-    using DynamicQuery.Entities.QueryComponents;
-    using DynamicQuery.Logic;
-    using Entities;
-    using Interfaces.Formatters;
-    using Logic;
+    using Furysoft.DynamicQuery.Dapper.Entities;
+    using Furysoft.DynamicQuery.Dapper.Interfaces.Formatters;
+    using Furysoft.DynamicQuery.Dapper.Logic;
+    using Furysoft.DynamicQuery.Entities.QueryComponents;
+    using Furysoft.DynamicQuery.Interfaces.QueryParsers;
+    using Furysoft.DynamicQuery.Logic;
     using Moq;
     using NUnit.Framework;
 
     /// <summary>
-    /// The Count CTE Formatter Tests
+    /// The Count CTE Formatter Tests.
     /// </summary>
     [TestFixture]
     public sealed class CountCteFormatterTests : TestBase
@@ -35,16 +34,24 @@ namespace Furysoft.DynamicQuery.Dapper.Tests.Integration.Formatters
             var mockOrderByFormatter = new Mock<IOrderByFormatter>();
             var mockPageFormatter = new Mock<IPageFormatter>();
             var mockWhereFormatter = new Mock<IWhereFormatter>();
+            var mockWhereParser = new Mock<IWhereParser>();
+            var mockSelectParser = new Mock<ISelectParser>();
 
-            mockWhereFormatter.Setup(r => r.Format(It.IsAny<Node>(), It.IsAny<IDictionary<string, object>>())).Returns(new SqlDataResponse
+            mockWhereFormatter.Setup(r => r.Format(It.IsAny<WhereNode>())).Returns(new SqlDataResponse
             {
-                Sql = "WHERE col1 = @col1"
+                Sql = "WHERE col1 = @col1",
             });
 
             mockOrderByFormatter.Setup(r => r.Format(It.IsAny<List<OrderByNode>>())).Returns("ORDER BY col1 asc");
-            mockPageFormatter.Setup(r => r.Format(It.IsAny<PageNode>(), It.IsAny<IDictionary<string, object>>())).Returns(new SqlDataResponse
+            mockPageFormatter.Setup(r => r.Format(It.IsAny<PageNode>())).Returns(new SqlDataResponse
             {
-                Sql = "OFFSET @offset LIMIT @limit"
+                Sql = "OFFSET @offset LIMIT @limit",
+            });
+
+            mockSelectParser.Setup(r => r.Parse(It.IsAny<string>(), It.IsAny<char>())).Returns(new SelectNode
+            {
+                SelectAll = true,
+                SelectColumns = new List<string> { "col_1", "col_2" },
             });
 
             var countCteFormatter = new CountCteFormatter(
@@ -52,18 +59,13 @@ namespace Furysoft.DynamicQuery.Dapper.Tests.Integration.Formatters
                 mockPageFormatter.Object,
                 mockWhereFormatter.Object);
 
-            var orderByNodes = new List<OrderByNode> { new OrderByNode() };
-            var node = new EqualsOperator();
-            var pageNode = new PageNode();
+            var query = new Query(mockWhereParser.Object, mockSelectParser.Object);
 
-            var query = new Query(orderByNodes, node, pageNode);
-
-            const string Select = "col1, col2";
             const string From = "table";
 
             // Act
             var stopwatch = Stopwatch.StartNew();
-            var sqlEntity = countCteFormatter.Format(query, Select, From);
+            var sqlEntity = countCteFormatter.Format(query, From);
             stopwatch.Stop();
 
             // Assert

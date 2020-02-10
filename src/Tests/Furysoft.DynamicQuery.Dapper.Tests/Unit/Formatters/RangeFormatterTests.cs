@@ -6,14 +6,14 @@
 
 namespace Furysoft.DynamicQuery.Dapper.Tests.Unit.Formatters
 {
-    using System.Collections.Generic;
     using System.Diagnostics;
-    using DynamicQuery.Entities.Operations;
-    using Logic.Formatters;
+    using System.Linq;
+    using Furysoft.DynamicQuery.Dapper.Logic.Formatters;
+    using Furysoft.DynamicQuery.Entities.Operations;
     using NUnit.Framework;
 
     /// <summary>
-    /// The Range Formatter Tests
+    /// The Range Formatter Tests.
     /// </summary>
     [TestFixture]
     public sealed class RangeFormatterTests : TestBase
@@ -33,22 +33,20 @@ namespace Furysoft.DynamicQuery.Dapper.Tests.Unit.Formatters
                 Lower = 25,
                 Upper = 100,
                 LowerInclusive = true,
-                UpperInclusive = false
+                UpperInclusive = false,
             };
-
-            var dataDictionary = new Dictionary<string, object>();
 
             // Act
             var stopwatch = Stopwatch.StartNew();
-            var sqlDataResponse = rangeFormatter.Format(node, dataDictionary);
+            var sqlDataResponse = rangeFormatter.Format(node, 0);
             stopwatch.Stop();
 
             // Assert
             this.WriteTimeElapsed(stopwatch);
 
-            Assert.That(sqlDataResponse.Sql, Is.EqualTo("ColumnName >= @ColumnNameLower AND ColumnName < @ColumnNameUpper"));
-            Assert.That(sqlDataResponse.Params["ColumnNameLower"], Is.EqualTo(25));
-            Assert.That(sqlDataResponse.Params["ColumnNameUpper"], Is.EqualTo(100));
+            Assert.That(sqlDataResponse.Sql, Is.EqualTo("ColumnName >= @ColumnName0 AND ColumnName < @ColumnName1"));
+            Assert.That(sqlDataResponse.Params.First(r => r.VarName == "ColumnName0").Value, Is.EqualTo(25));
+            Assert.That(sqlDataResponse.Params.First(r => r.VarName == "ColumnName1").Value, Is.EqualTo(100));
         }
 
         /// <summary>
@@ -66,22 +64,20 @@ namespace Furysoft.DynamicQuery.Dapper.Tests.Unit.Formatters
                 Lower = 25,
                 Upper = 100,
                 LowerInclusive = false,
-                UpperInclusive = true
+                UpperInclusive = true,
             };
-
-            var dataDictionary = new Dictionary<string, object>();
 
             // Act
             var stopwatch = Stopwatch.StartNew();
-            var sqlDataResponse = rangeFormatter.Format(node, dataDictionary);
+            var sqlDataResponse = rangeFormatter.Format(node, 0);
             stopwatch.Stop();
 
             // Assert
             this.WriteTimeElapsed(stopwatch);
 
-            Assert.That(sqlDataResponse.Sql, Is.EqualTo("ColumnName > @ColumnNameLower AND ColumnName <= @ColumnNameUpper"));
-            Assert.That(sqlDataResponse.Params["ColumnNameLower"], Is.EqualTo(25));
-            Assert.That(sqlDataResponse.Params["ColumnNameUpper"], Is.EqualTo(100));
+            Assert.That(sqlDataResponse.Sql, Is.EqualTo("ColumnName > @ColumnName0 AND ColumnName <= @ColumnName1"));
+            Assert.That(sqlDataResponse.Params.First(r => r.VarName == "ColumnName0").Value, Is.EqualTo(25));
+            Assert.That(sqlDataResponse.Params.First(r => r.VarName == "ColumnName1").Value, Is.EqualTo(100));
         }
     }
 }

@@ -6,17 +6,17 @@
 
 namespace Furysoft.DynamicQuery.Dapper
 {
-    using DynamicQuery.Interfaces;
-    using Interfaces;
-    using Logic;
+    using Furysoft.DynamicQuery.Dapper.Interfaces;
+    using Furysoft.DynamicQuery.Dapper.Logic;
+    using Furysoft.DynamicQuery.Interfaces;
 
     /// <summary>
-    /// The DynamicQueryExtensions
+    /// The DynamicQueryExtensions.
     /// </summary>
     public static class DynamicQueryExtensions
     {
         /// <summary>
-        /// The formatter
+        /// The formatter.
         /// </summary>
         private static readonly IFormatterFactory Formatter = FormatterInitializer.Create();
 
@@ -24,7 +24,7 @@ namespace Furysoft.DynamicQuery.Dapper
         /// Builds the specified query.
         /// </summary>
         /// <param name="query">The query.</param>
-        /// <returns>The <see cref="ISqlBuilder"/></returns>
+        /// <returns>The <see cref="ISqlBuilder"/>.</returns>
         public static ISqlBuilder CreateSqlQuery(this IQuery query)
         {
             return new SqlBuilder(Formatter, query);

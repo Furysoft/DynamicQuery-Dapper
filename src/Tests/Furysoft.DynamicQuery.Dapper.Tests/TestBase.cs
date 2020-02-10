@@ -10,7 +10,7 @@ namespace Furysoft.DynamicQuery.Dapper.Tests
     using System.Diagnostics;
 
     /// <summary>
-    /// The Test Base
+    /// The Test Base.
     /// </summary>
     public abstract class TestBase
     {

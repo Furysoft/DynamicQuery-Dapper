@@ -6,12 +6,12 @@
 
 namespace Furysoft.DynamicQuery.Dapper.Interfaces.Formatters
 {
-    using System.Collections.Generic;
-    using DynamicQuery.Entities.Nodes;
-    using Entities;
+    using Furysoft.DynamicQuery.Dapper.Entities;
+    using Furysoft.DynamicQuery.Entities.Nodes;
+    using JetBrains.Annotations;
 
     /// <summary>
-    /// The Where Operator Formatter
+    /// The Where Operator Formatter.
     /// </summary>
     /// <typeparam name="TType">The type of the type.</typeparam>
     public interface IWhereOperatorFormatter<in TType>
@@ -21,8 +21,9 @@ namespace Furysoft.DynamicQuery.Dapper.Interfaces.Formatters
         /// Formats the specified node.
         /// </summary>
         /// <param name="node">The node.</param>
-        /// <param name="dataDictionary">The data dictionary.</param>
-        /// <returns>The <see cref="SqlDataResponse"/></returns>
-        SqlDataResponse Format(TType node, IDictionary<string, object> dataDictionary);
+        /// <param name="paramSuffix">The parameter suffix.</param>
+        /// <returns>The <see cref="SqlDataResponse" />.</returns>
+        [NotNull]
+        SqlDataResponse Format([NotNull] TType node, int paramSuffix);
     }
 }

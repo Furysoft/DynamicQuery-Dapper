@@ -7,7 +7,7 @@
 namespace Furysoft.DynamicQuery.Dapper.Interfaces
 {
     /// <summary>
-    /// The Formatter Factory Interface
+    /// The Formatter Factory Interface.
     /// </summary>
     public interface IFormatterFactory
     {
@@ -15,7 +15,7 @@ namespace Furysoft.DynamicQuery.Dapper.Interfaces
         /// Creates the specified type.
         /// </summary>
         /// <param name="type">The type.</param>
-        /// <returns>The <see cref="IFormatter"/></returns>
+        /// <returns>The <see cref="IFormatter"/>.</returns>
         IFormatter Create(FormatterType type);
     }
 }

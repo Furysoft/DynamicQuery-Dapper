@@ -8,12 +8,12 @@ namespace Furysoft.DynamicQuery.Dapper.Logic.Formatters
 {
     using System.Collections.Generic;
     using System.Text;
-    using DynamicQuery.Entities.Operations;
-    using Entities;
-    using Interfaces.Formatters;
+    using Furysoft.DynamicQuery.Dapper.Entities;
+    using Furysoft.DynamicQuery.Dapper.Interfaces.Formatters;
+    using Furysoft.DynamicQuery.Entities.Operations;
 
     /// <summary>
-    /// The Equals Formatter
+    /// The Equals Formatter.
     /// </summary>
     public sealed class EqualsFormatter : IWhereOperatorFormatter<EqualsOperator>
     {
@@ -21,23 +21,19 @@ namespace Furysoft.DynamicQuery.Dapper.Logic.Formatters
         /// Formats the specified node.
         /// </summary>
         /// <param name="node">The node.</param>
-        /// <param name="dataDictionary">The data dictionary.</param>
-        /// <returns>The <see cref="SqlDataResponse"/></returns>
-        public SqlDataResponse Format(EqualsOperator node, IDictionary<string, object> dataDictionary)
+        /// <param name="paramSuffix">The parameter suffix.</param>
+        /// <returns>The <see cref="SqlDataResponse" />.</returns>
+        public SqlDataResponse Format(EqualsOperator node, int paramSuffix)
         {
-            if (node == null)
-            {
-                return null;
-            }
-
             /* Check for wildcards */
-            var wildCardFormat = WildcardFormat(node, dataDictionary);
+            var wildCardFormat = WildcardFormat(node, paramSuffix);
             if (wildCardFormat.IsWildcardQuery)
             {
                 return new SqlDataResponse
                 {
                     Sql = wildCardFormat.Sql,
-                    Params = dataDictionary
+                    Params = new List<SqlWhereParam> { wildCardFormat.Param },
+                    LastSuffix = paramSuffix,
                 };
             }
 
@@ -48,27 +44,28 @@ namespace Furysoft.DynamicQuery.Dapper.Logic.Formatters
                 return new SqlDataResponse
                 {
                     Sql = nullQueryFormat.Sql,
-                    Params = dataDictionary
+                    Params = new List<SqlWhereParam>(),
+                    LastSuffix = paramSuffix,
                 };
             }
 
             var op = GetOperator(node);
 
-            var sql = $"{node.Name} {op} @{node.Name}";
+            var paramName = $"{node.Name}{paramSuffix}";
+
+            var sql = $"{node.Name} {op} @{paramName}";
 
             var param = node.Value;
-
             if (param is string paramString)
             {
                 param = paramString.Trim('"');
             }
 
-            dataDictionary.Add(node.Name, param);
-
             return new SqlDataResponse
             {
                 Sql = sql,
-                Params = dataDictionary
+                Params = new List<SqlWhereParam> { new SqlWhereParam { VarName = paramName, Value = param } },
+                LastSuffix = paramSuffix,
             };
         }
 
@@ -76,7 +73,7 @@ namespace Furysoft.DynamicQuery.Dapper.Logic.Formatters
         /// Gets the operator.
         /// </summary>
         /// <param name="node">The node.</param>
-        /// <returns>The Equality Operator</returns>
+        /// <returns>The Equality Operator.</returns>
         private static string GetOperator(EqualsOperator node)
         {
             return node.IsNot ? "<>" : "=";
@@ -86,38 +83,30 @@ namespace Furysoft.DynamicQuery.Dapper.Logic.Formatters
         /// Nulls the query format.
         /// </summary>
         /// <param name="node">The node.</param>
-        /// <returns>The null query sql</returns>
-        private static(bool IsNullQuery, string Sql) NullQueryFormat(EqualsOperator node)
+        /// <returns>The null query sql.</returns>
+        private static (bool IsNullQuery, string Sql) NullQueryFormat(EqualsOperator node)
         {
-            if (node.Value as string == "NULL")
+            if (node.Value as string != "NULL")
             {
-                if (node.IsNot)
-                {
-                    return (true, $"{node.Name} IS NOT NULL");
-                }
-
-                return (true, $"{node.Name} IS NULL");
+                return (false, null);
             }
 
-            return (false, null);
+            return node.IsNot ? (true, $"{node.Name} IS NOT NULL") : (true, $"{node.Name} IS NULL");
         }
 
         /// <summary>
         /// Nulls the query format.
         /// </summary>
         /// <param name="node">The node.</param>
-        /// <param name="dataDictionary">The data dictionary.</param>
+        /// <param name="suffix">The suffix.</param>
         /// <returns>
-        /// The LIKE query sql
+        /// The LIKE query sql.
         /// </returns>
-        private static(bool IsWildcardQuery, string Sql) WildcardFormat(
-            EqualsOperator node,
-            IDictionary<string, object> dataDictionary)
+        private static (bool IsWildcardQuery, string Sql, SqlWhereParam Param) WildcardFormat(EqualsOperator node, int suffix)
         {
-            var nodeValue = node.Value as string;
-            if (nodeValue == null)
+            if (!(node.Value is string nodeValue))
             {
-                return (false, null);
+                return (false, null, null);
             }
 
             var sb = new StringBuilder(nodeValue);
@@ -140,19 +129,19 @@ namespace Furysoft.DynamicQuery.Dapper.Logic.Formatters
 
             if (hasWildcard)
             {
+                var varName = $"{node.Name}{suffix}";
+
                 sb.Replace("\\*", "*");
                 var dataPart = sb.ToString();
 
                 var sql = node.IsNot
-                    ? $"{node.Name} NOT LIKE @{node.Name}"
-                    : $"{node.Name} LIKE @{node.Name}";
+                    ? $"{node.Name} NOT LIKE @{varName}"
+                    : $"{node.Name} LIKE @{varName}";
 
-                dataDictionary.Add(node.Name, dataPart);
-
-                return (true, sql);
+                return (true, sql, new SqlWhereParam { Value = dataPart, VarName = varName });
             }
 
-            return (false, null);
+            return (false, null, null);
         }
     }
 }

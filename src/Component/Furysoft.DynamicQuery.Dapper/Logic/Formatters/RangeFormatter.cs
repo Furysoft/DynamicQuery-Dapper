@@ -7,12 +7,12 @@
 namespace Furysoft.DynamicQuery.Dapper.Logic.Formatters
 {
     using System.Collections.Generic;
-    using DynamicQuery.Entities.Operations;
-    using Entities;
-    using Interfaces.Formatters;
+    using Furysoft.DynamicQuery.Dapper.Entities;
+    using Furysoft.DynamicQuery.Dapper.Interfaces.Formatters;
+    using Furysoft.DynamicQuery.Entities.Operations;
 
     /// <summary>
-    /// The Range Formatter
+    /// The Range Formatter.
     /// </summary>
     public sealed class RangeFormatter : IWhereOperatorFormatter<RangeOperator>
     {
@@ -20,22 +20,29 @@ namespace Furysoft.DynamicQuery.Dapper.Logic.Formatters
         /// Formats the specified node.
         /// </summary>
         /// <param name="node">The node.</param>
-        /// <param name="dataDictionary">The data dictionary.</param>
-        /// <returns>The <see cref="SqlDataResponse"/></returns>
-        public SqlDataResponse Format(RangeOperator node, IDictionary<string, object> dataDictionary)
+        /// <param name="paramSuffix">The parameter suffix.</param>
+        /// <returns>The <see cref="SqlDataResponse" />.</returns>
+        public SqlDataResponse Format(RangeOperator node, int paramSuffix)
         {
             var lowerOperator = node.LowerInclusive ? ">=" : ">";
             var upperOperator = node.UpperInclusive ? "<=" : "<";
 
-            var sql = $"{node.Name} {lowerOperator} @{node.Name}Lower AND {node.Name} {upperOperator} @{node.Name}Upper";
+            var lowVarName = $"{node.Name}{paramSuffix}";
+            var highVarName = $"{node.Name}{paramSuffix + 1}";
 
-            dataDictionary.Add($"{node.Name}Lower", node.Lower);
-            dataDictionary.Add($"{node.Name}Upper", node.Upper);
+            var sql = $"{node.Name} {lowerOperator} @{lowVarName} AND {node.Name} {upperOperator} @{highVarName}";
+
+            var param = new List<SqlWhereParam>
+            {
+                new SqlWhereParam { VarName = lowVarName, Value = node.Lower },
+                new SqlWhereParam { VarName = highVarName, Value = node.Upper },
+            };
 
             return new SqlDataResponse
             {
                 Sql = sql,
-                Params = dataDictionary
+                Params = param,
+                LastSuffix = paramSuffix + 1,
             };
         }
     }

@@ -7,13 +7,13 @@
 namespace Furysoft.DynamicQuery.Dapper.Logic.Formatters
 {
     using System.Collections.Generic;
-    using DynamicQuery.Entities.QueryComponents;
-    using Entities;
-    using Interfaces.Formatters;
-    using Paging;
+    using Furysoft.DynamicQuery.Dapper.Entities;
+    using Furysoft.DynamicQuery.Dapper.Interfaces.Formatters;
+    using Furysoft.DynamicQuery.Entities.QueryComponents;
+    using Furysoft.Paging;
 
     /// <summary>
-    /// The Postgres Page Formatter
+    /// The Postgres Page Formatter.
     /// </summary>
     public sealed class PostgresPageFormatter : IPageFormatter
     {
@@ -21,11 +21,8 @@ namespace Furysoft.DynamicQuery.Dapper.Logic.Formatters
         /// Formats the specified node.
         /// </summary>
         /// <param name="node">The node.</param>
-        /// <param name="dataDictionary">The data dictionary.</param>
-        /// <returns>
-        /// The formatted sql string
-        /// </returns>
-        public SqlDataResponse Format(PageNode node, IDictionary<string, object> dataDictionary)
+        /// <returns>The formatted sql string.</returns>
+        public SqlDataResponse Format(PageNode node)
         {
             if (node == null)
             {
@@ -36,13 +33,14 @@ namespace Furysoft.DynamicQuery.Dapper.Logic.Formatters
 
             var skip = PagingHelpers.GetSkip(node.Page, node.ItemsPerPage);
 
-            dataDictionary.Add("offset", skip);
-            dataDictionary.Add("limit", node.ItemsPerPage);
-
             return new SqlDataResponse
             {
                 Sql = Sql,
-                Params = dataDictionary
+                Params = new List<SqlWhereParam>
+                {
+                    new SqlWhereParam { VarName = "offset", Value = skip },
+                    new SqlWhereParam { VarName = "limit", Value = node.ItemsPerPage },
+                },
             };
         }
     }

@@ -8,13 +8,13 @@ namespace Furysoft.DynamicQuery.Dapper.Tests.Unit.Formatters
 {
     using System.Collections.Generic;
     using System.Diagnostics;
-    using DynamicQuery.Entities;
-    using DynamicQuery.Entities.QueryComponents;
-    using Logic.Formatters;
+    using Furysoft.DynamicQuery.Dapper.Logic.Formatters;
+    using Furysoft.DynamicQuery.Entities;
+    using Furysoft.DynamicQuery.Entities.QueryComponents;
     using NUnit.Framework;
 
     /// <summary>
-    /// The Order By Formatter Tests
+    /// The Order By Formatter Tests.
     /// </summary>
     [TestFixture]
     public sealed class OrderByFormatterTests : TestBase
@@ -33,8 +33,8 @@ namespace Furysoft.DynamicQuery.Dapper.Tests.Unit.Formatters
                 new OrderByNode
                 {
                     SortOrder = SortOrder.Asc,
-                    Name = "col1"
-                }
+                    Name = "col1",
+                },
             };
 
             // Act
@@ -84,13 +84,13 @@ namespace Furysoft.DynamicQuery.Dapper.Tests.Unit.Formatters
                 new OrderByNode
                 {
                     SortOrder = SortOrder.Asc,
-                    Name = "col1"
+                    Name = "col1",
                 },
                 new OrderByNode
                 {
                     SortOrder = SortOrder.Desc,
-                    Name = "col2"
-                }
+                    Name = "col2",
+                },
             };
 
             // Act

@@ -7,7 +7,7 @@
 namespace Furysoft.DynamicQuery.Dapper.Entities
 {
     /// <summary>
-    /// The SQL Entity
+    /// The SQL Entity.
     /// </summary>
     public sealed class SqlEntity
     {

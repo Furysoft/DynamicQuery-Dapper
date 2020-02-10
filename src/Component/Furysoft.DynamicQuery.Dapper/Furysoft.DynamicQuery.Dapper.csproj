@@ -3,6 +3,8 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+
     <Copyright>© 2017, Simon Paramore</Copyright>
     <PackageLicenseUrl>https://github.com/Furysoft/DynamicQuery-Dapper/blob/master/LICENSE</PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/Furysoft/DynamicQuery-Dapper</PackageProjectUrl>
@@ -23,15 +25,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dapper" Version="1.50.5" />
-    <PackageReference Include="Furysoft.DynamicQuery" Version="1.0.3" />
+    <PackageReference Include="Dapper" Version="2.0.30" />
+    <PackageReference Include="Furysoft.DynamicQuery" Version="2.0.0" />
     <PackageReference Include="Furysoft.Paging" Version="1.0.1" />
-    <PackageReference Include="Jetbrains.Annotations" Version="2018.2.1" PrivateAssets="All" />
-    <PackageReference Include="System.ComponentModel.Annotations" Version="4.5.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
-    <PackageReference Include="protobuf-net" Version="2.4.0" />
-    <PackageReference Include="StyleCop.Analyzers" Version="1.0.2" PrivateAssets="All" />
-    <PackageReference Include="System.Runtime" Version="4.3.0" />
+    <PackageReference Include="Jetbrains.Annotations" Version="2019.1.3" PrivateAssets="All" />
+    <PackageReference Include="System.ComponentModel.Annotations" Version="4.7.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="protobuf-net" Version="2.4.4" />
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118" PrivateAssets="All" />
+    <PackageReference Include="System.Runtime" Version="4.3.1" />
     <PackageReference Include="System.Runtime.Serialization.Xml" Version="4.3.0" />
   </ItemGroup>
 

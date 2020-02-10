@@ -6,80 +6,18 @@
 
 namespace Furysoft.DynamicQuery.Dapper.Tests.Unit.Formatters
 {
-    using System.Collections.Generic;
     using System.Diagnostics;
-    using DynamicQuery.Entities.Operations;
-    using Logic.Formatters;
+    using System.Linq;
+    using Furysoft.DynamicQuery.Dapper.Logic.Formatters;
+    using Furysoft.DynamicQuery.Entities.Operations;
     using NUnit.Framework;
 
     /// <summary>
-    /// The Equals Formatter Tests
+    /// The Equals Formatter Tests.
     /// </summary>
     [TestFixture]
     public sealed class EqualsFormatterTests : TestBase
     {
-        /// <summary>
-        /// Formats the when string comparison expect correct SQL.
-        /// </summary>
-        [Test]
-        public void Format_WhenStringComparison_ExpectCorrectSql()
-        {
-            // Arrange
-            var equalsFormatter = new EqualsFormatter();
-
-            var node = new EqualsOperator
-            {
-                Name = "ColumnName",
-                IsNot = false,
-                Value = "bob",
-                Statement = "ColumnName:bob"
-            };
-
-            var dataDictionary = new Dictionary<string, object>();
-
-            // Act
-            var stopwatch = Stopwatch.StartNew();
-            var sqlDataResponse = equalsFormatter.Format(node, dataDictionary);
-            stopwatch.Stop();
-
-            // Assert
-            this.WriteTimeElapsed(stopwatch);
-
-            Assert.That(sqlDataResponse.Sql, Is.EqualTo("ColumnName = @ColumnName"));
-            Assert.That(sqlDataResponse.Params["ColumnName"], Is.EqualTo("bob"));
-        }
-
-        /// <summary>
-        /// Formats the when string not comparison expect correct SQL.
-        /// </summary>
-        [Test]
-        public void Format_WhenStringNotComparison_ExpectCorrectSql()
-        {
-            // Arrange
-            var equalsFormatter = new EqualsFormatter();
-
-            var node = new EqualsOperator
-            {
-                Name = "ColumnName",
-                IsNot = true,
-                Value = "bob",
-                Statement = "ColumnName:bob"
-            };
-
-            var dataDictionary = new Dictionary<string, object>();
-
-            // Act
-            var stopwatch = Stopwatch.StartNew();
-            var sqlDataResponse = equalsFormatter.Format(node, dataDictionary);
-            stopwatch.Stop();
-
-            // Assert
-            this.WriteTimeElapsed(stopwatch);
-
-            Assert.That(sqlDataResponse.Sql, Is.EqualTo("ColumnName <> @ColumnName"));
-            Assert.That(sqlDataResponse.Params["ColumnName"], Is.EqualTo("bob"));
-        }
-
         /// <summary>
         /// Formats the when is wildcard prefix expect like SQL.
         /// </summary>
@@ -94,52 +32,19 @@ namespace Furysoft.DynamicQuery.Dapper.Tests.Unit.Formatters
                 Name = "ColumnName",
                 IsNot = false,
                 Value = "*bob",
-                Statement = "ColumnName:*bob"
+                Statement = "ColumnName:*bob",
             };
-
-            var dataDictionary = new Dictionary<string, object>();
 
             // Act
             var stopwatch = Stopwatch.StartNew();
-            var sqlDataResponse = equalsFormatter.Format(node, dataDictionary);
+            var sqlDataResponse = equalsFormatter.Format(node, 0);
             stopwatch.Stop();
 
             // Assert
             this.WriteTimeElapsed(stopwatch);
 
-            Assert.That(sqlDataResponse.Sql, Is.EqualTo("ColumnName LIKE @ColumnName"));
-            Assert.That(sqlDataResponse.Params["ColumnName"], Is.EqualTo("%bob"));
-        }
-
-        /// <summary>
-        /// Formats the when is wildcard suffix expect like SQL.
-        /// </summary>
-        [Test]
-        public void Format_WhenIsWildcardSuffix_ExpectLikeSql()
-        {
-            // Arrange
-            var equalsFormatter = new EqualsFormatter();
-
-            var node = new EqualsOperator
-            {
-                Name = "ColumnName",
-                IsNot = false,
-                Value = "bob*",
-                Statement = "ColumnName:bob*"
-            };
-
-            var dataDictionary = new Dictionary<string, object>();
-
-            // Act
-            var stopwatch = Stopwatch.StartNew();
-            var sqlDataResponse = equalsFormatter.Format(node, dataDictionary);
-            stopwatch.Stop();
-
-            // Assert
-            this.WriteTimeElapsed(stopwatch);
-
-            Assert.That(sqlDataResponse.Sql, Is.EqualTo("ColumnName LIKE @ColumnName"));
-            Assert.That(sqlDataResponse.Params["ColumnName"], Is.EqualTo("bob%"));
+            Assert.That(sqlDataResponse.Sql, Is.EqualTo("ColumnName LIKE @ColumnName0"));
+            Assert.That(sqlDataResponse.Params.First().Value, Is.EqualTo("%bob"));
         }
 
         /// <summary>
@@ -156,21 +61,48 @@ namespace Furysoft.DynamicQuery.Dapper.Tests.Unit.Formatters
                 Name = "ColumnName",
                 IsNot = false,
                 Value = "*bob*",
-                Statement = "ColumnName:*bob*"
+                Statement = "ColumnName:*bob*",
             };
-
-            var dataDictionary = new Dictionary<string, object>();
 
             // Act
             var stopwatch = Stopwatch.StartNew();
-            var sqlDataResponse = equalsFormatter.Format(node, dataDictionary);
+            var sqlDataResponse = equalsFormatter.Format(node, 0);
             stopwatch.Stop();
 
             // Assert
             this.WriteTimeElapsed(stopwatch);
 
-            Assert.That(sqlDataResponse.Sql, Is.EqualTo("ColumnName LIKE @ColumnName"));
-            Assert.That(sqlDataResponse.Params["ColumnName"], Is.EqualTo("%bob%"));
+            Assert.That(sqlDataResponse.Sql, Is.EqualTo("ColumnName LIKE @ColumnName0"));
+            Assert.That(sqlDataResponse.Params.First().Value, Is.EqualTo("%bob%"));
+        }
+
+        /// <summary>
+        /// Formats the when is wildcard suffix expect like SQL.
+        /// </summary>
+        [Test]
+        public void Format_WhenIsWildcardSuffix_ExpectLikeSql()
+        {
+            // Arrange
+            var equalsFormatter = new EqualsFormatter();
+
+            var node = new EqualsOperator
+            {
+                Name = "ColumnName",
+                IsNot = false,
+                Value = "bob*",
+                Statement = "ColumnName:bob*",
+            };
+
+            // Act
+            var stopwatch = Stopwatch.StartNew();
+            var sqlDataResponse = equalsFormatter.Format(node, 0);
+            stopwatch.Stop();
+
+            // Assert
+            this.WriteTimeElapsed(stopwatch);
+
+            Assert.That(sqlDataResponse.Sql, Is.EqualTo("ColumnName LIKE @ColumnName0"));
+            Assert.That(sqlDataResponse.Params.First().Value, Is.EqualTo("bob%"));
         }
 
         /// <summary>
@@ -187,83 +119,19 @@ namespace Furysoft.DynamicQuery.Dapper.Tests.Unit.Formatters
                 Name = "ColumnName",
                 IsNot = false,
                 Value = @"*b*o\*b*",
-                Statement = @"ColumnName:*b*o\*b*"
+                Statement = @"ColumnName:*b*o\*b*",
             };
-
-            var dataDictionary = new Dictionary<string, object>();
 
             // Act
             var stopwatch = Stopwatch.StartNew();
-            var sqlDataResponse = equalsFormatter.Format(node, dataDictionary);
+            var sqlDataResponse = equalsFormatter.Format(node, 0);
             stopwatch.Stop();
 
             // Assert
             this.WriteTimeElapsed(stopwatch);
 
-            Assert.That(sqlDataResponse.Sql, Is.EqualTo("ColumnName LIKE @ColumnName"));
-            Assert.That(sqlDataResponse.Params["ColumnName"], Is.EqualTo(@"%b%o*b%"));
-        }
-
-        /// <summary>
-        /// Formats the when wildcard with not expect not like SQL.
-        /// </summary>
-        [Test]
-        public void Format_WhenWildcardWithNot_ExpectNotLikeSql()
-        {
-            // Arrange
-            var equalsFormatter = new EqualsFormatter();
-
-            var node = new EqualsOperator
-            {
-                Name = "ColumnName",
-                IsNot = true,
-                Value = @"*bob",
-                Statement = @"ColumnName:*bob"
-            };
-
-            var dataDictionary = new Dictionary<string, object>();
-
-            // Act
-            var stopwatch = Stopwatch.StartNew();
-            var sqlDataResponse = equalsFormatter.Format(node, dataDictionary);
-            stopwatch.Stop();
-
-            // Assert
-            this.WriteTimeElapsed(stopwatch);
-
-            Assert.That(sqlDataResponse.Sql, Is.EqualTo("ColumnName NOT LIKE @ColumnName"));
-            Assert.That(sqlDataResponse.Params["ColumnName"], Is.EqualTo(@"%bob"));
-        }
-
-        /// <summary>
-        /// Formats the when search for null expect is null SQL.
-        /// </summary>
-        [Test]
-        public void Format_WhenSearchForNull_ExpectIsNullSql()
-        {
-            // Arrange
-            var equalsFormatter = new EqualsFormatter();
-
-            var node = new EqualsOperator
-            {
-                Name = "ColumnName",
-                IsNot = false,
-                Value = @"NULL",
-                Statement = @"ColumnName:NULL"
-            };
-
-            var dataDictionary = new Dictionary<string, object>();
-
-            // Act
-            var stopwatch = Stopwatch.StartNew();
-            var sqlDataResponse = equalsFormatter.Format(node, dataDictionary);
-            stopwatch.Stop();
-
-            // Assert
-            this.WriteTimeElapsed(stopwatch);
-
-            Assert.That(sqlDataResponse.Sql, Is.EqualTo("ColumnName IS NULL"));
-            Assert.That(sqlDataResponse.Params.ContainsKey("ColumnName"), Is.False);
+            Assert.That(sqlDataResponse.Sql, Is.EqualTo("ColumnName LIKE @ColumnName0"));
+            Assert.That(sqlDataResponse.Params.First().Value, Is.EqualTo(@"%b%o*b%"));
         }
 
         /// <summary>
@@ -280,21 +148,48 @@ namespace Furysoft.DynamicQuery.Dapper.Tests.Unit.Formatters
                 Name = "ColumnName",
                 IsNot = true,
                 Value = @"NULL",
-                Statement = @"ColumnName:NULL"
+                Statement = @"ColumnName:NULL",
             };
-
-            var dataDictionary = new Dictionary<string, object>();
 
             // Act
             var stopwatch = Stopwatch.StartNew();
-            var sqlDataResponse = equalsFormatter.Format(node, dataDictionary);
+            var sqlDataResponse = equalsFormatter.Format(node, 0);
             stopwatch.Stop();
 
             // Assert
             this.WriteTimeElapsed(stopwatch);
 
             Assert.That(sqlDataResponse.Sql, Is.EqualTo("ColumnName IS NOT NULL"));
-            Assert.That(sqlDataResponse.Params.ContainsKey("ColumnName"), Is.False);
+            Assert.That(sqlDataResponse.Params.Any(), Is.False);
+        }
+
+        /// <summary>
+        /// Formats the when search for null expect is null SQL.
+        /// </summary>
+        [Test]
+        public void Format_WhenSearchForNull_ExpectIsNullSql()
+        {
+            // Arrange
+            var equalsFormatter = new EqualsFormatter();
+
+            var node = new EqualsOperator
+            {
+                Name = "ColumnName",
+                IsNot = false,
+                Value = @"NULL",
+                Statement = @"ColumnName:NULL",
+            };
+
+            // Act
+            var stopwatch = Stopwatch.StartNew();
+            var sqlDataResponse = equalsFormatter.Format(node, 0);
+            stopwatch.Stop();
+
+            // Assert
+            this.WriteTimeElapsed(stopwatch);
+
+            Assert.That(sqlDataResponse.Sql, Is.EqualTo("ColumnName IS NULL"));
+            Assert.That(sqlDataResponse.Params.Any(), Is.False);
         }
 
         /// <summary>
@@ -311,21 +206,106 @@ namespace Furysoft.DynamicQuery.Dapper.Tests.Unit.Formatters
                 Name = "ColumnName",
                 IsNot = false,
                 Value = "\"NULL\"",
-                Statement = "ColumnName:\"NULL\""
+                Statement = "ColumnName:\"NULL\"",
             };
-
-            var dataDictionary = new Dictionary<string, object>();
 
             // Act
             var stopwatch = Stopwatch.StartNew();
-            var sqlDataResponse = equalsFormatter.Format(node, dataDictionary);
+            var sqlDataResponse = equalsFormatter.Format(node, 0);
             stopwatch.Stop();
 
             // Assert
             this.WriteTimeElapsed(stopwatch);
 
-            Assert.That(sqlDataResponse.Sql, Is.EqualTo("ColumnName = @ColumnName"));
-            Assert.That(sqlDataResponse.Params["ColumnName"], Is.EqualTo(@"NULL"));
+            Assert.That(sqlDataResponse.Sql, Is.EqualTo("ColumnName = @ColumnName0"));
+            Assert.That(sqlDataResponse.Params.First().Value, Is.EqualTo(@"NULL"));
+        }
+
+        /// <summary>
+        /// Formats the when string comparison expect correct SQL.
+        /// </summary>
+        [Test]
+        public void Format_WhenStringComparison_ExpectCorrectSql()
+        {
+            // Arrange
+            var equalsFormatter = new EqualsFormatter();
+
+            var node = new EqualsOperator
+            {
+                Name = "ColumnName",
+                IsNot = false,
+                Value = "bob",
+                Statement = "ColumnName:bob",
+            };
+
+            // Act
+            var stopwatch = Stopwatch.StartNew();
+            var sqlDataResponse = equalsFormatter.Format(node, 0);
+            stopwatch.Stop();
+
+            // Assert
+            this.WriteTimeElapsed(stopwatch);
+
+            Assert.That(sqlDataResponse.Sql, Is.EqualTo("ColumnName = @ColumnName0"));
+            Assert.That(sqlDataResponse.Params.First().Value, Is.EqualTo("bob"));
+        }
+
+        /// <summary>
+        /// Formats the when string not comparison expect correct SQL.
+        /// </summary>
+        [Test]
+        public void Format_WhenStringNotComparison_ExpectCorrectSql()
+        {
+            // Arrange
+            var equalsFormatter = new EqualsFormatter();
+
+            var node = new EqualsOperator
+            {
+                Name = "ColumnName",
+                IsNot = true,
+                Value = "bob",
+                Statement = "ColumnName:bob",
+            };
+
+            // Act
+            var stopwatch = Stopwatch.StartNew();
+            var sqlDataResponse = equalsFormatter.Format(node, 0);
+            stopwatch.Stop();
+
+            // Assert
+            this.WriteTimeElapsed(stopwatch);
+
+            Assert.That(sqlDataResponse.Sql, Is.EqualTo("ColumnName <> @ColumnName0"));
+            Assert.That(sqlDataResponse.Params.First().Value, Is.EqualTo("bob"));
+        }
+
+        /// <summary>
+        /// Formats the when wildcard with not expect not like SQL.
+        /// </summary>
+        [Test]
+        public void Format_WhenWildcardWithNot_ExpectNotLikeSql()
+        {
+            // Arrange
+            var equalsFormatter = new EqualsFormatter();
+
+            var node = new EqualsOperator
+            {
+                Name = "ColumnName",
+                IsNot = true,
+                Value = @"*bob",
+                Statement = @"ColumnName:*bob",
+            };
+
+            // Act
+            var stopwatch = Stopwatch.StartNew();
+            var sqlDataResponse = equalsFormatter.Format(node, 0);
+            stopwatch.Stop();
+
+            // Assert
+            this.WriteTimeElapsed(stopwatch);
+
+            Assert.That(sqlDataResponse.Sql, Is.EqualTo("ColumnName NOT LIKE @ColumnName0"));
+            Assert.That(sqlDataResponse.Params.First().Value, Is.EqualTo(@"%bob"));
         }
     }
 }

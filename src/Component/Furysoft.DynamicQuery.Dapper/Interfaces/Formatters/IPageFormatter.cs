@@ -6,12 +6,11 @@
 
 namespace Furysoft.DynamicQuery.Dapper.Interfaces.Formatters
 {
-    using System.Collections.Generic;
-    using DynamicQuery.Entities.QueryComponents;
-    using Entities;
+    using Furysoft.DynamicQuery.Dapper.Entities;
+    using Furysoft.DynamicQuery.Entities.QueryComponents;
 
     /// <summary>
-    /// The Page Formatter Interface
+    /// The Page Formatter Interface.
     /// </summary>
     public interface IPageFormatter
     {
@@ -19,8 +18,7 @@ namespace Furysoft.DynamicQuery.Dapper.Interfaces.Formatters
         /// Formats the specified page node.
         /// </summary>
         /// <param name="pageNode">The page node.</param>
-        /// <param name="dataDictionary">The data dictionary.</param>
-        /// <returns>The <see cref="SqlDataResponse" /></returns>
-        SqlDataResponse Format(PageNode pageNode, IDictionary<string, object> dataDictionary);
+        /// <returns>The <see cref="SqlDataResponse" />.</returns>
+        SqlDataResponse Format(PageNode pageNode);
     }
 }

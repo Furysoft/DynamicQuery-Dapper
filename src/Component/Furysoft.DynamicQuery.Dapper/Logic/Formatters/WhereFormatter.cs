@@ -7,38 +7,40 @@
 namespace Furysoft.DynamicQuery.Dapper.Logic.Formatters
 {
     using System.Collections.Generic;
+    using System.Linq;
     using System.Text;
-    using DynamicQuery.Entities.Nodes;
-    using DynamicQuery.Entities.Operations;
-    using Entities;
-    using Interfaces.Formatters;
+    using Furysoft.DynamicQuery.Dapper.Entities;
+    using Furysoft.DynamicQuery.Dapper.Exceptions;
+    using Furysoft.DynamicQuery.Dapper.Interfaces.Formatters;
+    using Furysoft.DynamicQuery.Entities.Operations;
+    using Furysoft.DynamicQuery.Entities.QueryComponents;
     using JetBrains.Annotations;
 
     /// <summary>
-    /// The Where Formatter
+    /// The Where Formatter.
     /// </summary>
     public sealed class WhereFormatter : IWhereFormatter
     {
         /// <summary>
-        /// The equality formatter
+        /// The equality formatter.
         /// </summary>
         [NotNull]
         private readonly IWhereOperatorFormatter<EqualsOperator> equalsFormatter;
 
         /// <summary>
-        /// The greater than formatter
+        /// The greater than formatter.
         /// </summary>
         [NotNull]
         private readonly IWhereOperatorFormatter<GreaterThanOperator> greaterThanFormatter;
 
         /// <summary>
-        /// The less than formatter
+        /// The less than formatter.
         /// </summary>
         [NotNull]
         private readonly IWhereOperatorFormatter<LessThanOperator> lessThanFormatter;
 
         /// <summary>
-        /// The less than formatter
+        /// The less than formatter.
         /// </summary>
         [NotNull]
         private readonly IWhereOperatorFormatter<RangeOperator> rangeFormatter;
@@ -66,13 +68,33 @@ namespace Furysoft.DynamicQuery.Dapper.Logic.Formatters
         /// Formats the specified where node.
         /// </summary>
         /// <param name="whereNode">The where node.</param>
-        /// <param name="dataDictionary">The data dictionary.</param>
-        /// <returns>The <see cref="SqlDataResponse"/></returns>
-        public SqlDataResponse Format(Node whereNode, IDictionary<string, object> dataDictionary)
+        /// <returns>The <see cref="SqlDataResponse" />.</returns>
+        public SqlDataResponse Format(WhereNode whereNode)
         {
-            var sb = new StringBuilder();
+            if (whereNode == null)
+            {
+                return null;
+            }
 
-            this.FormatLocal(whereNode, dataDictionary, sb);
+            var sb = new StringBuilder();
+            var index = 0;
+            var node = whereNode;
+            var paramList = new List<SqlWhereParam>();
+            do
+            {
+                var sqlDataResponse = this.FormatLocal(node, index);
+                sb.AppendFormat("{0}\r\n", sqlDataResponse.Sql);
+                paramList = paramList.Concat(sqlDataResponse.Params).ToList();
+
+                if (node.Next != null)
+                {
+                    sb.AppendFormat(" {0} ", node.Conjunctive);
+                }
+
+                index = sqlDataResponse.LastSuffix + 1;
+                node = node.Next;
+            }
+            while (node != null);
 
             if (sb.Length == 0)
             {
@@ -84,7 +106,8 @@ namespace Furysoft.DynamicQuery.Dapper.Logic.Formatters
             return new SqlDataResponse
             {
                 Sql = sb.ToString(),
-                Params = dataDictionary
+                Params = paramList,
+                LastSuffix = index,
             };
         }
 
@@ -92,43 +115,33 @@ namespace Furysoft.DynamicQuery.Dapper.Logic.Formatters
         /// Formats the local.
         /// </summary>
         /// <param name="whereNode">The where node.</param>
-        /// <param name="dataDictionary">The data dictionary.</param>
-        /// <param name="stringBuilder">The string builder.</param>
-        private void FormatLocal(
-            Node whereNode,
-            IDictionary<string, object> dataDictionary,
-            StringBuilder stringBuilder)
+        /// <param name="paramSuffix">The parameter suffix.</param>
+        /// <returns>The <see cref="SqlDataResponse"/>.</returns>
+        private SqlDataResponse FormatLocal(WhereNode whereNode, int paramSuffix)
         {
-            if (whereNode is BinaryNode binaryNode)
+            var statementValue = whereNode.Statement.Value;
+
+            if (statementValue is EqualsOperator equalsOperator)
             {
-                this.FormatLocal(binaryNode.LeftNode, dataDictionary, stringBuilder);
-                stringBuilder.AppendFormat(" {0} ", binaryNode.Conjunctive);
-                this.FormatLocal(binaryNode.RightNode, dataDictionary, stringBuilder);
+                return this.equalsFormatter.Format(equalsOperator, paramSuffix);
             }
 
-            if (whereNode is EqualsOperator equalsOperator)
+            if (statementValue is LessThanOperator lessThanOperator)
             {
-                var sqlDataResponse = this.equalsFormatter.Format(equalsOperator, dataDictionary);
-                stringBuilder.AppendFormat("{0}\r\n", sqlDataResponse.Sql);
+                return this.lessThanFormatter.Format(lessThanOperator, paramSuffix);
             }
 
-            if (whereNode is LessThanOperator lessThanOperator)
+            if (statementValue is GreaterThanOperator greaterThanOperator)
             {
-                var sqlDataResponse = this.lessThanFormatter.Format(lessThanOperator, dataDictionary);
-                stringBuilder.AppendFormat("{0}\r\n", sqlDataResponse.Sql);
+                return this.greaterThanFormatter.Format(greaterThanOperator, paramSuffix);
             }
 
-            if (whereNode is GreaterThanOperator greaterThanOperator)
+            if (statementValue is RangeOperator rangeOperator)
             {
-                var sqlDataResponse = this.greaterThanFormatter.Format(greaterThanOperator, dataDictionary);
-                stringBuilder.AppendFormat("{0}\r\n", sqlDataResponse.Sql);
+                return this.rangeFormatter.Format(rangeOperator, paramSuffix);
             }
 
-            if (whereNode is RangeOperator rangeOperator)
-            {
-                var sqlDataResponse = this.rangeFormatter.Format(rangeOperator, dataDictionary);
-                stringBuilder.AppendFormat("{0}\r\n", sqlDataResponse.Sql);
-            }
+            throw new SqlParseException($"Invalid statementValue type {statementValue.GetType().Name}");
         }
     }
 }

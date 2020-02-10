@@ -6,11 +6,11 @@
 
 namespace Furysoft.DynamicQuery.Dapper.Interfaces
 {
-    using DynamicQuery.Interfaces;
-    using Entities;
+    using Furysoft.DynamicQuery.Dapper.Entities;
+    using Furysoft.DynamicQuery.Interfaces;
 
     /// <summary>
-    /// The Formatter Interface
+    /// The Formatter Interface.
     /// </summary>
     public interface IFormatter
     {
@@ -18,11 +18,8 @@ namespace Furysoft.DynamicQuery.Dapper.Interfaces
         /// Formats the specified query.
         /// </summary>
         /// <param name="query">The query.</param>
-        /// <param name="select">The select.</param>
         /// <param name="from">From.</param>
-        /// <returns>
-        /// The <see cref="SqlEntity" />
-        /// </returns>
-        SqlEntity Format(IQuery query, string select, string from);
+        /// <returns>The <see cref="SqlEntity" />.</returns>
+        SqlEntity Format(IQuery query, string from);
     }
 }
