@@ -103,7 +103,8 @@ namespace Furysoft.DynamicQuery.Dapper.Logic
             sb.Append("), count_cte AS (SELECT COUNT(*) as total_rows FROM data_cte)\r\n");
 
             /* The Cross Join section */
-            sb.AppendFormat(" SELECT {0}, total_rows\r\n", query.SelectNode.SelectColumns);
+            var fullSelect = string.Join(", ", query.SelectNode.SelectColumns);
+            sb.AppendFormat(" SELECT {0}, total_rows\r\n", fullSelect);
 
             sb.AppendFormat("FROM data_cte CROSS JOIN count_cte\r\n");
 
